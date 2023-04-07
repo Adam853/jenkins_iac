@@ -13,4 +13,16 @@ def getJsonConfigTree(command) {
   return new JsonSlurper().parseText(tree)
 }
 
-println "This is message from DSL job groovy script file!"
+def jsonProjectsStruct = getJsonConfigTree(tree_command)
+
+for (jsonProjectStruct in jsonProjectStruct [0].contents) {
+  jsonProjectStruct.info = jsonProjectStruct.name + "builds"
+ 
+  //println dslBuildProject(jsonProjectStruct, [])
+  
+  //println dslBuildView(jsonProjectStruct)
+  
+}
+
+
+println jsonProjectsStruct
