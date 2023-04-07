@@ -18,12 +18,54 @@ def jsonProjectsStruct = getJsonConfigTree(tree_command)
 for (jsonProjectStruct in jsonProjectStruct [0].contents) {
   jsonProjectStruct.info = jsonProjectStruct.name + "builds"
  
-  //println dslBuildProject(jsonProjectStruct, [])
+  println dslBuildProject(jsonProjectStruct, [])
   
   //println dslBuildView(jsonProjectStruct)
   
 }
 
+//Jenkins DSL language - create folder in jenkins
+def dslBuildFolder(folderPath, folderProject) {
+    folderProject.info = (folderProject.info) ?: folderProject.name
+
+    folder(folderPath){
+        displayName(folderProject.info)
+        description(folderProject.info)
+     
+    }
+  
+  //Jenkins DSL language - create job in jenkins
+def dslBuildJob(jobPath, jobName) {
+
+    pipelineJob("$jobPath/$jobName") {
+        logRotator {
+            numToKeep(30)
+        }
+        concurrentBuild(false)
+        definition {
+            cpsScm {
+
+                scm {
+                    git{
+
+                        remote{
+                            url('https://my_repo')
+                            credentials('my_credentials')
+                        }
+
+                        branch('*/main')
+                    }
+                }
+
+                lightweight(true)
+
+                scriptPath('jenkinsfiles/my_app_dev.jenkinsfile')
+            }
+        }        
+    }
+}
+  
+}
 
 //recursive function to build nested folder and job structure
 def dslBuildProject(jsonProjectStruct, rootFolderPath) {
@@ -40,10 +82,10 @@ def dslBuildProject(jsonProjectStruct, rootFolderPath) {
     }
 
     // build jobs
-    if (jsonProjectStruct.type == "file") {
-        def jobName = jsonProjectStruct.name =~ /(.*)\.jenkinsfile/
-        dslBuildJob(rootFolderPath.join('/'), jobName[0][1])
-    }
+    //if (jsonProjectStruct.type == "file") {
+    //    def jobName = jsonProjectStruct.name =~ /(.*)\.jenkinsfile/
+    //    dslBuildJob(rootFolderPath.join('/'), jobName[0][1])
+    //}
 
     return "Completion of project building: ${localFolderPath.join('/')}"
 }
